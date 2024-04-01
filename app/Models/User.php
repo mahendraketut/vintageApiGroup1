@@ -58,8 +58,8 @@ class User extends Authenticatable
         return $this->morphOne(Image::class, 'imageable');
     }
 
-    // public function shippingAddresses()
-    // {
-    //     return $this->hasMany(ShippingAddress::class);
-    // }
+    public function shippingAddresses()
+    {
+        return $this->hasMany(ShippingAddress::class);
+    }
 }

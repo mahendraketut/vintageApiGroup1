@@ -35,5 +35,9 @@ Route::prefix('v1')->group(function () {
             Route::get('profile-detail/{profile}', 'App\Http\Controllers\Profiles\ProfileController@show');
             Route::put('profile-update/{profile}', 'App\Http\Controllers\Profiles\ProfileController@update');
         });
+
+        Route::get('shipping-address/trash', 'App\Http\Controllers\Address\ShippingAddressController@trash');
+        Route::post('shipping-address/restore/{id}', 'App\Http\Controllers\Address\ShippingAddressController@restore');
+        Route::resource('shipping-address', 'App\Http\Controllers\Address\ShippingAddressController')->except(['create', 'edit']);
     });
 });
