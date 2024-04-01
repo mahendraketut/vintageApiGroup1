@@ -28,7 +28,7 @@ Route::prefix('v1')->group(function () {
     Route::post('login', 'App\Http\Controllers\Auth\LoginController@login');
 
     Route::middleware('auth:sanctum')->group(function () {
-        Route::put('change-password', 'App\Http\Controllers\ChangePasswordController@changePassword');
+        Route::put('change-password', 'App\Http\Controllers\Auth\ChangePasswordController@changePassword');
         Route::post('logout', 'App\Http\Controllers\Auth\LogoutController@logout');
     });
 });
