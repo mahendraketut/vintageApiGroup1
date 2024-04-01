@@ -14,10 +14,10 @@ class Category extends Model
 
     protected $fillable = ['name'];
 
-    public function products(): HasMany
-    {
-        return $this->hasMany(Product::class);
-    }
+    // public function products(): HasMany
+    // {
+    //     return $this->hasMany(Product::class);
+    // }
 
     public function image(): MorphOne
     {

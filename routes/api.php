@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\BrandController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -43,4 +44,8 @@ Route::prefix('v1')->group(function () {
         Route::post('shipping-address/restore/{id}', 'App\Http\Controllers\Address\ShippingAddressController@restore');
         Route::resource('shipping-address', 'App\Http\Controllers\Address\ShippingAddressController')->except(['create', 'edit']);
     });
+});
+
+Route::prefix('v1')->group(function () {
+    Route::resource('/brands', BrandController::class);
 });
