@@ -30,9 +30,13 @@ class LoginController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         // Return the user and token details with response code 200 - OK
-        return $this->successResponse([
-            'user' => $user,
-            'token' => $token,
-        ]);
+        return $this->successResponse(
+            [
+                'user' => $user,
+                'token' => $token,
+            ],
+            'User authenticated successfully',
+            200
+        );
     }
 }
