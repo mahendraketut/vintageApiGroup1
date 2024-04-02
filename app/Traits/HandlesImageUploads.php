@@ -16,7 +16,6 @@ trait HandlesImageUploads
      */
     protected function storeImage($files, string $destination = 'public/images'): array
     {
-
         $fileNames = [];
 
         // Ensure $files is always an array
