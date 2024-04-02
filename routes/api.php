@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+
 
 Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -30,7 +32,7 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::put('change-password', 'App\Http\Controllers\Auth\ChangePasswordController@changePassword');
         Route::post('logout', 'App\Http\Controllers\Auth\LogoutController@logout');
-        Route::put('change-password', 'App\Http\Controllers\Auth\ChangePasswordController@changePassword');
+        Route::resource('/categories', CategoryController::class);
 
         Route::prefix('profile')->group(function () {
             Route::get('profile-detail/{profile}', 'App\Http\Controllers\Profiles\ProfileController@show');
