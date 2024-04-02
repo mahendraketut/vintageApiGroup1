@@ -24,7 +24,7 @@ class LoginController extends Controller
         }
 
         // Get the authenticated user
-        $user = User::where('email', $request->email)->firstOrFail();
+        $user = User::where('email', $request->email)->with('profile')->first();
 
         // Generate a token for the user
         $token = $user->createToken('auth_token')->plainTextToken;

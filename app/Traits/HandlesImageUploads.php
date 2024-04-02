@@ -51,6 +51,11 @@ trait HandlesImageUploads
     {
         $fileNames = [];
 
+        // Ensure $files is always an array
+        if (!is_array($files)) {
+            $files = [$files];
+        }
+
         foreach ($files as $file) {
             $imageName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
             $file->storeAs($destination, $imageName);

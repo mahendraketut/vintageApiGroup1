@@ -27,6 +27,12 @@ class RegisterController extends Controller
             'password' => bcrypt($request->password),
         ]);
 
+        // Attach a profile to the user
+        $user->profile()->create([
+            'full_name' => $request->full_name,
+            'phone' => $request->phone,
+        ]);
+
         // Generate a token for the user
         $token = $user->createToken('auth_token')->plainTextToken;
 
