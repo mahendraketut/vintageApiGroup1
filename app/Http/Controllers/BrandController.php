@@ -15,27 +15,7 @@ class BrandController extends Controller
      */
     public function index(Request $request)
     {
-        $brand_query = Brand::with('products');
-
-        if ($request->keyword) {
-            $brand_query->where('name', 'LIKE', '%' . $request->keyword . '%');
-        }
-
-        // sort by
-        if ($request->sortBy && in_array($request->sortBy, ['id', 'name'])) {
-            $sortBy = $request->sortBy;
-        } else {
-            $sortBy = 'id';
-        }
-
-        // sort order
-        if ($request->sortOrder && in_array($request->sortOrder, ['asc', 'desc'])) {
-            $sortOrder = $request->sortOrder;
-        } else {
-            $sortOrder = 'asc';
-        }
-
-        $brands = $brand_query->orderBy($sortBy, $sortOrder)->paginate(3);
+        $brands = Brand::all();
 
         return $this->showResponse($brands);
     }
@@ -53,10 +33,9 @@ class BrandController extends Controller
      */
     public function show(string $id)
     {
-        $brand = Brand::with('products');
-        $brand = $brand->find($id);
+        $brand = Brand::findOrFail($id);
 
-        return response()->json(['brand' => $brand]);
+        return $this->showResponse($brand);
     }
 
     /**
