@@ -8,18 +8,19 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
-class Category extends Model
+class Brand extends Model
 {
     use HasFactory;
+    use SoftDeletes;
 
     protected $fillable = ['name'];
 
-    // public function products(): HasMany
-    // {
-    //     return $this->hasMany(Product::class);
-    // }
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
+    }
 
-    public function image(): MorphOne
+    public function image():MorphOne
     {
         return $this->morphOne(Image::class, 'imageable');
     }
