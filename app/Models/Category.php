@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 class Category extends Model
 {
     use HasFactory;
-    use SoftDeletes;
 
     protected $fillable = ['name'];
 
