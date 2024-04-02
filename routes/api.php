@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -23,4 +24,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::prefix('v1')->group(function () {
     Route::resource('/brands', BrandController::class);
     Route::resource('/categories', CategoryController::class);
+    Route::put('/products/restore', ProductController::class, 'restore');
+    Route::resource('/products', ProductController::class);
 });

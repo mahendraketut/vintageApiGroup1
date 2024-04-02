@@ -8,7 +8,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Contracts\Validation\Validator;
 
-class ProductStoreRequest extends FormRequest
+class ProductUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -35,7 +35,7 @@ class ProductStoreRequest extends FormRequest
             'category_id' => ['required', new NoNegativeValue],
             'brand_id' => ['required', new NoNegativeValue],
             'size' => ['required'],
-            'images' => ['image', 'mimes:png,jpg,jpeg', 'max:2048']
+            'images.*' => ['image', 'mimes:png,jpg,jpeg', 'max:2048']
         ];
     }
 
@@ -55,8 +55,8 @@ class ProductStoreRequest extends FormRequest
             'category_id.required' => "Category id can't be null",
             'brand_id.required' => "Brand id can't be null",
             'size.required' => "Product size can't be null",
-            'image.*.max' => "Image size should be less than 2mb",
-            'image.*.mimes' => "Only png, jpg, and jpeg files are allowed"
+            'image.max' => "Image size should be less than 2mb",
+            'image.mimes' => "Only png, jpg, and jpeg files are allowed"
         ];
     }
 
