@@ -36,7 +36,7 @@ Route::prefix('v1')->group(function () {
         Route::post('logout', 'App\Http\Controllers\Auth\LogoutController@logout');
         Route::resource('/categories', CategoryController::class);
         Route::resource('/brands', BrandController::class);
-        Route::put('/products/restore', ProductController::class, 'restore');
+        Route::put('/products/restore/{product}', [ProductController::class, 'restore']);
         Route::resource('/products', ProductController::class);
 
         Route::prefix('profile')->group(function () {

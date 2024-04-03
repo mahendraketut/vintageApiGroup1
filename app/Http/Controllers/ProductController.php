@@ -11,15 +11,14 @@ use App\Traits\ApiResponseTrait;
 
 class ProductController extends Controller
 {
-    use HandlesImageUploads;
-    use ApiResponseTrait;
+    use HandlesImageUploads, ApiResponseTrait;
     /**
      * Display a listing of the resource.
      */
-    public function __invoke(Request $request)
+    public function index(Request $request)
     {
         $user = auth('sanctum')->user();
-        $product_query = Product::with(['category', 'brand', 'user']);
+        $product_query = Product::with(['category', 'brand', 'user', 'images']);
 
         if ($user) {
             $product_query->where('user_id', $user->id);
@@ -83,24 +82,35 @@ class ProductController extends Controller
      */
     public function store(ProductStoreRequest $request)
     {
-        $validated = $request->validated();
-        unset($validated['images']);
+        $product = Product::create([
+            'name' => $request->name,
+            'description' => $request->description,
+            'price' => $request->price,
+            'quantity' => $request->quantity,
+            'condition' => $request->condition,
+            'discount' => $request->discount,
+            'category_id' => $request->category_id,
+            'user_id' => auth('sanctum')->user()->id,
+            'brand_id' => $request->brand_id,
+            'size' => $request->size
+        ]);
 
-        $product = Product::create($validated);
 
+        // check if the user uploaded an image
         if ($request->hasFile('images')) {
-            $imageNames = $this->storeImage($request->file('images'), 'public/images');
-
-            if (is_array($imageNames)) {
+            // store the image in the storage folder using Handle Image Uploads trait
+            $imageNames = $this->storeImage($request->file('images'));
+            // create a new image record in the database and associate it with the product
+            if (count($imageNames) === 1) {
+                $product->images()->create(['url' => $imageNames[0]]);
+            } else {
                 foreach ($imageNames as $imageName) {
-                    $product->image()->create([], ['url' => $imageName]);
+                    $product->images()->create(['url' => $imageName]);
                 }
             }
         }
 
-        if ($product) {
-            return $this->successResponse($product, 'Product added successfully');
-        }
+        return $this->createdResponse(['product' => $product]);
     }
 
     /**
@@ -108,7 +118,7 @@ class ProductController extends Controller
      */
     public function show(string $id)
     {
-        $product = Product::find($id);
+        $product = Product::with(['category', 'brand', 'user', 'images'])->findOrFail($id);
 
         return $this->showResponse($product);
     }
@@ -118,35 +128,35 @@ class ProductController extends Controller
      */
     public function update(ProductUpdateRequest $request, string $id)
     {
-        $user = auth('sanctum')->user();
-        $validated = $request->validated();
+        $product = Product::findOrFail($id);
 
-        unset($validated['images']);
-        $validated['user_id'] = $user->id;
+        $product->update([
+            'name' => $request->name,
+            'description' => $request->description,
+            'price' => $request->price,
+            'quantity' => $request->quantity,
+            'condition' => $request->condition,
+            'discount' => $request->discount,
+            'category_id' => $request->category_id,
+            'brand_id' => $request->brand_id,
+            'size' => $request->size
+        ]);
 
-        $product = Product::find($id);
-        if (!$product) {
-            return $this->notFoundResponse();
-        }
-
+        // check if the user uploaded an image
         if ($request->hasFile('images')) {
-            if ($product->image) {
-                $imageNames = $this->storeImage($request->file('images'), 'public/images');
-                
-                if (is_array($imageNames)) {
-                    foreach ($imageNames as $imageName) {
-                        $product->image()->updateOrCreate([], ['url' => $imageName]);
-                    }
-                } else {
-                    $product->image()->updateOrCreate([], ['url' => $imageNames]);
+            // store the image in the storage folder using Handle Image Uploads trait
+            $imageNames = $this->updateImages($request->file('images'), 'public/images', $product->images->pluck('url')->toArray());
+            // create a new image record in the database and associate it with the product
+            if (count($imageNames) === 1) {
+                $product->images()->create(['url' => $imageNames[0]]);
+            } else {
+                foreach ($imageNames as $imageName) {
+                    $product->images()->create(['url' => $imageName]);
                 }
             }
         }
 
-        if ($product) {
-            return $this->updateResponse($product);
-        }
-
+        return $this->updateResponse(['product' => $product]);
     }
 
     /**
@@ -154,13 +164,7 @@ class ProductController extends Controller
      */
     public function destroy(string $id)
     {
-
-        $product = Product::find($id);
-
-        if (!$product) {
-            return $this->notFoundResponse();
-        }
-
+        $product = Product::findOrFail($id);
         $product->delete();
 
         return $this->deleteResponse($product);
@@ -168,11 +172,7 @@ class ProductController extends Controller
 
     public function restore(string $id)
     {
-        $product = Product::withTrashed()->find($id);
-
-        if (!$product) {
-            return $this->notFoundResponse();
-        }
+        $product = Product::withTrashed()->findOrFail($id);
 
         $product->restore();
 

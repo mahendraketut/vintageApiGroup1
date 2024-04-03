@@ -28,14 +28,14 @@ class ProductStoreRequest extends FormRequest
         return [
             'name' => ['required', 'max:255'],
             'description' => ['required', 'max:255'],
-            'price' => ['required', 'decimal', new NoNegativeValue],
+            'price' => ['required', 'decimal:2', new NoNegativeValue],
             'quantity' => ['required', 'integer', new NoNegativeValue],
             'condition' => ['required'],
-            'discount' => ['decimal', new NoNegativeValue],
+            'discount' => ['decimal:2', new NoNegativeValue],
             'category_id' => ['required', new NoNegativeValue],
             'brand_id' => ['required', new NoNegativeValue],
             'size' => ['required'],
-            'images' => ['image', 'mimes:png,jpg,jpeg', 'max:2048']
+            'images.*' => ['image', 'mimes:png,jpg,jpeg', 'max:1024']
         ];
     }
 
@@ -60,12 +60,11 @@ class ProductStoreRequest extends FormRequest
         ];
     }
 
-    public function FailedValidation(Validator $validator)
+    public function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json([
             'success' => false,
-            'message' => 'Validation errors',
-            'data' => $validator->errors()
-        ]));
+            'message' => $validator->errors()->first()
+        ], 422));
     }
 }
