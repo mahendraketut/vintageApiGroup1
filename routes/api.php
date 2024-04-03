@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BrandController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -35,6 +36,8 @@ Route::prefix('v1')->group(function () {
         Route::post('logout', 'App\Http\Controllers\Auth\LogoutController@logout');
         Route::resource('/categories', CategoryController::class);
         Route::resource('/brands', BrandController::class);
+        Route::put('/products/restore/{product}', [ProductController::class, 'restore']);
+        Route::resource('/products', ProductController::class);
 
         Route::prefix('profile')->group(function () {
             Route::get('profile-detail/{profile}', 'App\Http\Controllers\Profiles\ProfileController@show');
