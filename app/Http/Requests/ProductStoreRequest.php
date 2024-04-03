@@ -43,6 +43,6 @@ class ProductStoreRequest extends FormRequest
             'description.required' => "Product description can't be null",
             'description.max' => "Product description must be less than 256 characters",
             'price.required' => "Product price can't be null"
-        ]
+        ];
     }
 }
