@@ -47,7 +47,7 @@ trait HandlesImageUploads
      * @param array|null $oldFileNames
      * @return array
      */
-    protected function updateImages(array $files, string $destination = 'public/images', ?array $oldFileNames = null): array
+    protected function updateImages($files, string $destination = 'public/images', ?array $oldFileNames = null): array
     {
         $fileNames = [];
 

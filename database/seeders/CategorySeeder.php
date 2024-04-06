@@ -18,7 +18,9 @@ class CategorySeeder extends Seeder
 
         for ($i = 1; $i <= 7; $i++) {
             DB::table('categories')->insert([
-                'name' => $faker->unique()->word
+                'name' => $faker->unique()->word,
+                'created_at' => now(),
+                'updated_at' => now()
             ]);
         }
     }

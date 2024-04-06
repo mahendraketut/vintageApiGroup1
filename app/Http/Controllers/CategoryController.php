@@ -8,13 +8,17 @@ use App\Traits\ApiResponseTrait;
 
 class CategoryController extends Controller
 {
+    use ApiResponseTrait;
 
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $category_query = Category::with('products');
+        // Get all categories
+        $categories = Category::all();
+
+        return $this->showResponse($categories);
     }
 
     /**
@@ -22,7 +26,6 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        
     }
 
     /**
@@ -30,7 +33,9 @@ class CategoryController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $category = Category::findOrFail($id);
+
+        return $this->showResponse($category);
     }
 
     /**
