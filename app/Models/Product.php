@@ -45,4 +45,13 @@ class Product extends Model
     {
         return $this->hasMany(Cart::class);
     }
+
+    public function hasImage(): bool
+    {
+        if ($this->images->count() > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
