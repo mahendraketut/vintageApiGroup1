@@ -50,9 +50,7 @@ Route::prefix('v1')->group(function () {
         Route::get('shipping-address/trash', 'App\Http\Controllers\Address\ShippingAddressController@trash');
         Route::post('shipping-address/restore/{id}', 'App\Http\Controllers\Address\ShippingAddressController@restore');
         Route::resource('shipping-address', 'App\Http\Controllers\Address\ShippingAddressController')->except(['create', 'edit']);
-
         Route::resource('wishlists', 'App\Http\Controllers\WishlistController');
-
 
         Route::get('/orders', [OrderController::class, 'index']);
         Route::post('/order', [OrderController::class, 'store']);
