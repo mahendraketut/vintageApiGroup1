@@ -19,10 +19,6 @@ class CartController extends Controller
     {
         $user = auth('sanctum')->user();
 
-        if (!$user) {
-            return $this->unAuthorisedResponse();
-        }
-
         $cartProducts = Cart::with('Product')->where('user_id', $user->id)->get();
 
         if (!$cartProducts) {
@@ -38,10 +34,6 @@ class CartController extends Controller
     public function store(CartStoreRequest $request)
     {
         $user = auth('sanctum')->user();
-
-        if (!$user) {
-            return $this->unAuthorisedResponse();
-        }
 
         // make sure user can't add more than 100 unique products to cart
         $maxProducts = 100;
@@ -93,12 +85,6 @@ class CartController extends Controller
      */
     public function show(string $id)
     {
-        $user = auth('sanctum')->user();
-
-        if (!$user) {
-            return $this->unAuthorisedResponse();
-        }
-
         $cart = Cart::with('Product')->find($id);
 
         return $this->showResponse($cart);
