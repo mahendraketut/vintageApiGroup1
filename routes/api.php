@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BrandController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\ProductController;
 use App\Models\Wishlist;
 use Illuminate\Http\Request;
@@ -38,6 +39,7 @@ Route::prefix('v1')->group(function () {
         Route::resource('/brands', BrandController::class);
         Route::put('/products/restore/{product}', [ProductController::class, 'restore']);
         Route::resource('/products', ProductController::class);
+        Route::resource('/carts', CartController::class);
 
         Route::prefix('profile')->group(function () {
             Route::get('profile-detail/{profile}', 'App\Http\Controllers\Profiles\ProfileController@show');
