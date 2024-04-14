@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\Product;
 use App\Http\Requests\StoreOrderRequest;
+use App\Http\Requests\CartOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
+use App\Models\Cart;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\ApiResponseTrait;
 
@@ -62,6 +64,96 @@ class OrderController extends Controller
         }
 
         // Return a success response
+        return $this->successResponse($order, 'Order created successfully.', 201);
+    }
+
+    /**
+     * Method that handle direct order creation
+     *
+     * @param StoreOrderRequest $request
+     */
+    public function directOrder(StoreOrderRequest $request)
+    {
+        // make a new order with the request data
+        $orderId = 'ORD' . time() . rand(001, 999);
+
+        // Calculate the total price of the order items
+        $total = 0;
+        foreach ($request->products as $productData) {
+            // Retrieve the product details based on the product ID
+            $product = Product::findOrFail($productData['id']);
+
+            // Calculate the subtotal for this product
+            $total += $product->price * $productData['quantity'];
+        }
+
+        $order = Order::create([
+            'order_number' => $orderId,
+            'user_id' => Auth::user()->id,
+            'status' => 'pending',
+            'total' => $total,
+        ]);
+
+        // Attach each product to the order with quantity and price
+        foreach ($request->products as $productData) {
+            $product = Product::findOrFail($productData['id']);
+            $subtotal = $product->price * $productData['quantity'];
+
+            $order->products()->attach($product->id, [
+                'quantity' => $productData['quantity'],
+                'price' => $product->price,
+            ]);
+        }
+
+        // Return a success response
+        return $this->successResponse($order, 'Direct order created successfully.', 201);
+    }
+
+    /**
+     * Handle order creation from cart
+     *
+     * @param CartOrderRequest $request
+     */
+    public function cartOrder(CartOrderRequest $request)
+    {
+        //Retrieve cart items from the request
+        $cartItems = Cart::whereIn('id', $request->cart_item_ids)->get();
+
+        //Calculate the total price of the order items
+        $total = 0;
+        foreach ($cartItems as $cartItem) {
+            //Retrieve the product details based on the product ID
+            $product = Product::findOrFail($cartItem->product_id);
+
+            //Calculate the subtotal for this product
+            $total += $product->price * $cartItem->quantity;
+        }
+
+        //Create a new order
+        $orderId = 'ORD' . time() . rand(001, 999);
+
+        $order = Order::create([
+            'order_number' => $orderId,
+            'user_id' => Auth::user()->id,
+            'status' => 'pending',
+            'total' => $total,
+        ]);
+
+        //Attach each product to the order with quantity and price
+        foreach ($cartItems as $cartItem) {
+            $product = Product::findOrFail($cartItem->product_id);
+            $subtotal = $product->price * $cartItem->quantity;
+
+            $order->products()->attach($product->id, [
+                'quantity' => $cartItem->quantity,
+                'price' => $product->price,
+            ]);
+        }
+
+        // Clear selected cart items from the cart
+        Cart::whereIn('id', $request->cart_item_ids)->delete();
+
+        //Return a success response
         return $this->successResponse($order, 'Order created successfully.', 201);
     }
 

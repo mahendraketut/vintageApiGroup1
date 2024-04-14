@@ -53,9 +53,9 @@ Route::prefix('v1')->group(function () {
         Route::resource('wishlists', 'App\Http\Controllers\WishlistController');
 
         Route::get('/orders', [OrderController::class, 'index']);
-        Route::post('/order', [OrderController::class, 'store']);
+        Route::post('/order/direct', [OrderController::class, 'directOrder']);
+        Route::post('/order/cart', [OrderController::class, 'cartOrder']);
         Route::get('/order/{order}', [OrderController::class, 'show']);
-        Route::put('/order/{order}', [OrderController::class, 'update']);
         Route::put('/order/{order}/cancel', [OrderController::class, 'cancel']);
     });
 });
