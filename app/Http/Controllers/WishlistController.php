@@ -22,10 +22,6 @@ class WishlistController extends Controller
     {
         $user = auth('sanctum')->user();
 
-        if (!$user) {
-            return $this->unAuthorisedResponse();
-        }
-
         // $wishlist_query = Wishlist::with('user');
         $wishlists = Wishlist::where('user_id', $user->id)->get();
 
@@ -37,7 +33,7 @@ class WishlistController extends Controller
             return $this->notFoundResponse();
         }
 
-        return $this->successResponse($wishlists);
+        return $this->successResponse($wishlists, 'Wishlists retrieved successfully.');
     }
 
     /**
@@ -46,10 +42,6 @@ class WishlistController extends Controller
     public function store(Request $request)
     {
         $user = auth('sanctum')->user();
-
-        if (!$user) {
-            return $this->unAuthorisedResponse();
-        }
 
         $wishlist = Wishlist::create([
             'product_id' => $request->product_id,
@@ -68,12 +60,6 @@ class WishlistController extends Controller
      */
     public function show(string $id)
     {
-        $user = auth('sanctum')->user();
-
-        if (!$user) {
-            return $this->unAuthorisedResponse();
-        }
-
         $wishlistProduct = Wishlist::find($id)->with('product');
 
         if (!$wishlistProduct) {
@@ -96,17 +82,7 @@ class WishlistController extends Controller
      */
     public function destroy(string $id)
     {
-        $user = auth('sanctum')->user();
-
-        if (!$user) {
-            return $this->unAuthorisedResponse();
-        }
-
-        $wishlist = Wishlist::find($id);
-
-        if (!$wishlist) {
-            return $this->notFoundResponse();
-        }
+        $wishlist = Wishlist::findOrFail($id);
 
         $wishlist->delete();
 
