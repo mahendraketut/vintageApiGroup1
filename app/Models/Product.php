@@ -34,4 +34,13 @@ class Product extends Model
     {
         return $this->morphMany(Image::class, 'imageable');
     }
+
+    public function hasImage(): bool
+    {
+        if ($this->images->count() > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
