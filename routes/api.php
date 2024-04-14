@@ -3,6 +3,7 @@
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\ProductController;
+use App\Models\Wishlist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,7 +17,6 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-
 
 Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -47,5 +47,6 @@ Route::prefix('v1')->group(function () {
         Route::get('shipping-address/trash', 'App\Http\Controllers\Address\ShippingAddressController@trash');
         Route::post('shipping-address/restore/{id}', 'App\Http\Controllers\Address\ShippingAddressController@restore');
         Route::resource('shipping-address', 'App\Http\Controllers\Address\ShippingAddressController')->except(['create', 'edit']);
+        Route::resource('wishlists', 'App\Http\Controllers\WishlistController');
     });
 });
