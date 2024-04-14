@@ -4,6 +4,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\OrderController;
 use App\Models\Wishlist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -49,6 +50,14 @@ Route::prefix('v1')->group(function () {
         Route::get('shipping-address/trash', 'App\Http\Controllers\Address\ShippingAddressController@trash');
         Route::post('shipping-address/restore/{id}', 'App\Http\Controllers\Address\ShippingAddressController@restore');
         Route::resource('shipping-address', 'App\Http\Controllers\Address\ShippingAddressController')->except(['create', 'edit']);
+
         Route::resource('wishlists', 'App\Http\Controllers\WishlistController');
+
+
+        Route::get('/orders', [OrderController::class, 'index']);
+        Route::post('/order', [OrderController::class, 'store']);
+        Route::get('/order/{order}', [OrderController::class, 'show']);
+        Route::put('/order/{order}', [OrderController::class, 'update']);
+        Route::put('/order/{order}/cancel', [OrderController::class, 'cancel']);
     });
 });

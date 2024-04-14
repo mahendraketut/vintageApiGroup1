@@ -36,6 +36,7 @@ class Product extends Model
         return $this->morphMany(Image::class, 'imageable');
     }
 
+
     public function wishlists(): HasMany
     {
         return $this->hasMany(Wishlist::class);
@@ -44,5 +45,13 @@ class Product extends Model
     public function carts(): HasMany
     {
         return $this->hasMany(Cart::class);
+    }
+    public function hasImage(): bool
+    {
+        if ($this->images->count() > 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
