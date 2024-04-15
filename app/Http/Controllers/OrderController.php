@@ -8,105 +8,119 @@ use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\CartOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Models\Cart;
+use App\Models\ShippingAddress;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\ApiResponseTrait;
+use App\Traits\checkShippingCostTraits;
 
 class OrderController extends Controller
 {
-    use ApiResponseTrait;
+    use ApiResponseTrait, checkShippingCostTraits;
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
         // Get all orders with pagination
-        $orders = Order::latest()->with('orderDetails')->paginate(10);
+        $orders = Order::latest()->with('orderDetails', 'shipping')->paginate(10);
 
         // Return a collection of $orders with pagination
         return $this->successResponse($orders, 'Orders retrieved successfully.');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreOrderRequest $request)
+    public function directOrder(StoreOrderRequest $request)
     {
-        // make a new order with the request data
-        $orderId = 'ORD' . time() . rand(001, 999);
+        $address = ShippingAddress::findOrFail($request->address_id);
+        // dd($address->city);
 
-        // Calculate the total price of the order items
-        $total = 0;
-        foreach ($request->products as $productData) {
-            // Retrieve the product details based on the product ID
-            $product = Product::findOrFail($productData['id']);
+        $origin = 114; // TODO : Change this to seller origin city
+        $destination = $this->getCityId($address->city);
+        $weight = 100;
+        $courier = $request->courier;
+        $cost = 0;
+        $service = '';
 
-            // Calculate the subtotal for this product
-            $subtotal = $product->price * $productData['quantity'];
-            $total += $subtotal;
+        $shippingCost = $this->calculateCost($origin, $destination, $weight, $courier);
+        // dd($shippingCost);
+
+        $shippingDetails = $this->extractShippingCostDetails($shippingCost);
+
+        if (!$shippingDetails) {
+            return response()->json(['success' => false, 'message' => 'Invalid shipping cost response.'], 400);
         }
 
-        $order = Order::create([
-            'order_number' => $orderId,
-            'user_id' => Auth::user()->id,
-            'status' => 'pending',
-            'total' => $total,
-        ]);
+        // Access extracted shipping details
+        $service = $shippingDetails['service'];
+        $etd = $shippingDetails['etd'];
+        $cost = $shippingDetails['cost'];
 
-        // Attach each product to the order with quantity and price
-        foreach ($request->products as $productData) {
-            $product = Product::findOrFail($productData['id']);
-            $subtotal = $product->price * $productData['quantity'];
+        // Create order and attach products and shipping details
+        $order = $this->createOrder($request->products, $service, $cost, $request->address_id);
 
-            $order->products()->attach($product->id, [
-                'quantity' => $productData['quantity'],
-                'price' => $product->price,
-            ]);
-        }
+        // Reload order with details for response
+        $order = Order::with('orderDetails', 'shipping')->findOrFail($order->id);
 
-        // Return a success response
-        return $this->successResponse($order, 'Order created successfully.', 201);
+        // Return success response with created order details
+        return $this->successResponse($order, 'Direct order created successfully.', 201);
     }
 
     /**
-     * Method that handle direct order creation
+     * Create a new order with associated products and shipping details.
      *
-     * @param StoreOrderRequest $request
+     * @param array $productsData
+     * @param string $shippingService
+     * @param float $shippingCost
+     * @param int $addressId
+     * @return Order
      */
-    public function directOrder(StoreOrderRequest $request)
+    private function createOrder($productsData, $shippingService, $shippingCost, $addressId)
     {
-        // make a new order with the request data
-        $orderId = 'ORD' . time() . rand(001, 999);
-
-        // Calculate the total price of the order items
         $total = 0;
-        foreach ($request->products as $productData) {
-            // Retrieve the product details based on the product ID
+
+        foreach ($productsData as $productData) {
             $product = Product::findOrFail($productData['id']);
 
-            // Calculate the subtotal for this product
-            $total += $product->price * $productData['quantity'];
+            if ($product->quantity < $productData['quantity']) {
+                throw new \Exception('Insufficient stock for product: ' . $product->name);
+            }
+
+            $subtotal = $product->price * $productData['quantity'];
+            $total += $subtotal;
+
+            // Update product quantity in stock
+            $product->decrement('quantity', $productData['quantity']);
         }
 
+        // Calculate total order amount (including shipping cost)
+        $total += $shippingCost;
+
+        // Create the order
         $order = Order::create([
-            'order_number' => $orderId,
+            'order_number' => 'ORD' . time() . rand(001, 999),
             'user_id' => Auth::user()->id,
             'status' => 'pending',
             'total' => $total,
         ]);
 
-        // Attach each product to the order with quantity and price
-        foreach ($request->products as $productData) {
+        // Attach order details (products) to the order
+        foreach ($productsData as $productData) {
             $product = Product::findOrFail($productData['id']);
-            $subtotal = $product->price * $productData['quantity'];
-
-            $order->products()->attach($product->id, [
+            $order->orderDetails()->create([
+                'product_id' => $product->id,
                 'quantity' => $productData['quantity'],
                 'price' => $product->price,
             ]);
         }
 
-        // Return a success response
-        return $this->successResponse($order, 'Direct order created successfully.', 201);
+        // Attach shipping details to the order
+        $order->shipping()->create([
+            'shipping_address_id' => $addressId,
+            'tracking_number' => 'TRK' . time() . rand(001, 999),
+            'service' => $shippingService,
+            'cost' => $shippingCost
+        ]);
+
+        return $order;
     }
 
     /**
@@ -115,6 +129,49 @@ class OrderController extends Controller
      * @param CartOrderRequest $request
      */
     public function cartOrder(CartOrderRequest $request)
+    {
+        $address = ShippingAddress::findOrFail($request->address_id);
+        // dd($address->city);
+
+        $origin = 114; // TODO : Change this to seller origin city
+        $destination = $this->getCityId($address->city);
+        $weight = 1000;
+        $courier = $request->courier;
+        $cost = 0;
+        $service = '';
+
+        $shippingCost = $this->calculateCost($origin, $destination, $weight, $courier);
+        // dd($shippingCost);
+
+        $shippingDetails = $this->extractShippingCostDetails($shippingCost);
+
+        if (!$shippingDetails) {
+            return response()->json(['success' => false, 'message' => 'Invalid shipping cost response.'], 400);
+        }
+
+        // Access extracted shipping details
+        $service = $shippingDetails['service'];
+        $etd = $shippingDetails['etd'];
+        $cost = $shippingDetails['cost'];
+
+        // Create order and attach products and shipping details
+        $order = $this->createOrderFromCart($request, ['service' => $service, 'cost' => $cost]);
+
+        // Attach the order detail and shipping to the order
+        $order = Order::with('orderDetails', 'shipping')->findOrFail($order->id);
+
+        //Return a success response
+        return $this->successResponse($order, 'Order created successfully.', 201);
+    }
+
+    /**
+     * Create a new order from a CartOrderRequest with associated shipping details.
+     *
+     * @param CartOrderRequest $request
+     * @param array $shippingData
+     * @return Order
+     */
+    private function createOrderFromCart(CartOrderRequest $request, $shippingData)
     {
         //Retrieve cart items from the request
         $cartItems = Cart::whereIn('id', $request->cart_item_ids)->get();
@@ -128,6 +185,14 @@ class OrderController extends Controller
             //Calculate the subtotal for this product
             $total += $product->price * $cartItem->quantity;
         }
+
+        // Calculate total order amount including shipping cost
+        $total += $shippingData['cost'];
+
+        // Clear selected cart items from the cart
+        Cart::whereIn('id', $request->cart_item_ids)->delete();
+
+        // Attach shipping details to the order
 
         //Create a new order
         $orderId = 'ORD' . time() . rand(001, 999);
@@ -148,13 +213,19 @@ class OrderController extends Controller
                 'quantity' => $cartItem->quantity,
                 'price' => $product->price,
             ]);
+
+            //Update the product quantity in stock
+            $product->decrement('quantity', $cartItem->quantity);
         }
 
-        // Clear selected cart items from the cart
-        Cart::whereIn('id', $request->cart_item_ids)->delete();
+        $order->shipping()->create([
+            'shipping_address_id' => $request->address_id,
+            'tracking_number' => 'TRK' . time() . rand(001, 999),
+            'service' => $shippingData['service'],
+            'cost' => $shippingData['cost'],
+        ]);
 
-        //Return a success response
-        return $this->successResponse($order, 'Order created successfully.', 201);
+        return $order;
     }
 
     /**
@@ -163,7 +234,7 @@ class OrderController extends Controller
     public function show(Order $order)
     {
         // Return a single order
-        $order = Order::with('orderDetails')->findOrFail($order->id);
+        $order = Order::with('orderDetails', 'shipping')->findOrFail($order->id);
 
         return $this->successResponse($order, 'Order retrieved successfully.');
     }
