@@ -24,6 +24,8 @@ class StoreOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'address_id' => 'required|exists:shipping_addresses,id',
+            'courier' => 'required|string',
             'products' => 'required|array',
             'products.*.id' => 'required|exists:products,id',
             'products.*.quantity' => 'required|integer|min:1',
@@ -38,6 +40,10 @@ class StoreOrderRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'address_id.required' => 'Address ID is required.',
+            'address_id.exists' => 'Address ID does not exist.',
+            'courier.required' => 'Courier is required.',
+            'courier.string' => 'Courier must be a string.',
             'products.required' => 'Products are required.',
             'products.array' => 'Products must be an array.',
             'products.*.id.required' => 'Product ID is required.',
