@@ -47,9 +47,10 @@ class PaymentController extends Controller
 
         // $prefilledMessage = "Hi, I would like to pay for my order:\nProducts:".$order['product_name']."\nquantity: ".$order['quantity']."\nPrice: ".$order['price'];
 
-        // $prefilledMessage = "Hi, I would like to pay for my order: ".$order_id;
-        // $prefilledMessage = urlencode($prefilledMessage);
-        $whatsappUrl = "https://api.whatsapp.com/send?phone=+6281246871634&text=Hi%2C%20I%20would%20like%20to%20pay%20for%20my%20order";
+        $prefilledMessage = "Hi, I would like to confirm my order: $order_id" . PHP_EOL .
+                   "Please let me know if you require any further information.";
+
+        $whatsappUrl = "https://api.whatsapp.com/send?phone=+123456789&text=" . urlencode($prefilledMessage);
 
         return redirect()->away($whatsappUrl);
     }
