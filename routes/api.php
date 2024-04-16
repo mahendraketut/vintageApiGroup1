@@ -3,6 +3,8 @@
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\ProductController;
 use App\Models\Wishlist;
 use Illuminate\Http\Request;
@@ -33,6 +35,8 @@ Route::prefix('v1')->group(function () {
     Route::post('register', 'App\Http\Controllers\Auth\RegisterController@register');
     Route::post('login', 'App\Http\Controllers\Auth\LoginController@login');
 
+    Route::resource('/payment-methods', PaymentMethodController::class);
+
     Route::middleware('auth:sanctum')->group(function () {
         Route::put('change-password', 'App\Http\Controllers\Auth\ChangePasswordController@changePassword');
         Route::post('logout', 'App\Http\Controllers\Auth\LogoutController@logout');
@@ -41,6 +45,9 @@ Route::prefix('v1')->group(function () {
         Route::put('/products/restore/{product}', [ProductController::class, 'restore']);
         Route::resource('/products', ProductController::class);
         Route::resource('/carts', CartController::class);
+
+        Route::resource('/payments', PaymentController::class);
+
 
         Route::prefix('profile')->group(function () {
             Route::get('profile-detail/{profile}', 'App\Http\Controllers\Profiles\ProfileController@show');
