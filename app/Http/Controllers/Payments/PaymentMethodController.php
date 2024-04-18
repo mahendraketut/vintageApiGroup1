@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Payments;
 
 use App\Models\PaymentMethod;
 use Illuminate\Http\Request;
 use App\Traits\ApiResponseTrait;
+use App\Http\Controllers\Controller;
 
 class PaymentMethodController extends Controller
 {

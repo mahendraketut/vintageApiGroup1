@@ -3,8 +3,8 @@
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CartController;
-use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\PaymentMethodController;
+use App\Http\Controllers\Payments\PaymentController;
+use App\Http\Controllers\Payments\PaymentMethodController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\OrderController;
 use App\Models\Wishlist;
@@ -45,8 +45,8 @@ Route::prefix('v1')->group(function () {
         Route::put('/products/restore/{product}', [ProductController::class, 'restore']);
         Route::resource('/products', ProductController::class);
         Route::resource('/carts', CartController::class);
-
-        Route::resource('/payments', PaymentController::class);
+        
+        Route::resource('/payments', PaymentController::class)->except('notification');
 
 
         Route::prefix('profile')->group(function () {

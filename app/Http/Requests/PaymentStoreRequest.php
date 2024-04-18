@@ -27,7 +27,7 @@ class PaymentStoreRequest extends FormRequest
         return [
             'method_id' => ['required', 'gte:1'],
             'order_id' => ['required', 'gte:1'],
-            'amount' => ['required', 'decimal:2', new NoNegativeValue]
+            // 'amount' => ['required', 'decimal:2', new NoNegativeValue]
         ];
     }
 
@@ -38,8 +38,8 @@ class PaymentStoreRequest extends FormRequest
             'method_id.min' => "Select only available payment methods",
             'order_id.required' => "Must select an order to pay",
             'order_id.min' => "select one order to complete payment",
-            'amount.required' => "amount to pay must be equals to or greater than 0",
-            'amount.decimal' => "amount of payment must be in decimal value"
+            // 'amount.required' => "amount to pay must be equals to or greater than 0",
+            // 'amount.decimal' => "amount of payment must be in decimal value"
         ];
     }
 

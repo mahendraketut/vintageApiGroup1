@@ -1,11 +1,16 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Payments;
 
 use App\Http\Requests\PaymentStoreRequest;
+use App\Models\Order;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use App\Traits\ApiResponseTrait;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Midtrans\Config;
+use Midtrans\CoreApi;
 
 class PaymentController extends Controller
 {
@@ -27,32 +32,46 @@ class PaymentController extends Controller
      */
     public function store(PaymentStoreRequest $request)
     {
+
+        $order = Order::find($request->order_id);
+        $totalPrice = $order->total;
+
         $payment = Payment::create([
             'method_id' => $request->method_id,
             'order_id' => $request->order_id,
-            'amount' => $request->amount
+            'amount' => $totalPrice
         ]);
 
-        $order_id = $request->order_id;
+        // Set your Merchant Server Key
+        \Midtrans\Config::$serverKey = config('midtrans.serverKey');
+        // Set to Development/Sandbox Environment (default). Set to true for Production Environment (accept real transaction).
+        \Midtrans\Config::$isProduction = false;
+        // Set sanitization on (default)
+        \Midtrans\Config::$isSanitized = true;
+        // Set 3DS transaction for credit card to true
+        \Midtrans\Config::$is3ds = true;
 
-        $order = [
-            'product_name' => 'Product A',
-            'quantity' => 5,
-            'price' => 200.00
-        ];
+        $params = array(
+            'transaction_details' => array(
+                'order_id' => $request->order_id,
+                'gross_amount' => $totalPrice,
+            ),
+            'customer_details' => array(
+                'name' => Auth::user()->username,
+                'email' => Auth::user()->email
+            )
+        );
+        
+        $snapResponse = \Midtrans\Snap::createTransaction($params);
+
+        $payment->snap_token = $snapResponse->token;
+        $payment->save();
 
         if (!$payment) {
             return $this->serverErrorResponse();
         }
 
-        // $prefilledMessage = "Hi, I would like to pay for my order:\nProducts:".$order['product_name']."\nquantity: ".$order['quantity']."\nPrice: ".$order['price'];
-
-        $prefilledMessage = "Hi, I would like to confirm my order: $order_id" . PHP_EOL .
-                   "Please let me know if you require any further information.";
-
-        $whatsappUrl = "https://api.whatsapp.com/send?phone=+123456789&text=" . urlencode($prefilledMessage);
-
-        return redirect()->away($whatsappUrl);
+        return $this->createdResponse($snapResponse);
     }
 
     /**
@@ -67,6 +86,41 @@ class PaymentController extends Controller
         }
 
         return $this->showResponse($payment);
+    }
+
+    // payment success notification (will be hooked by midtrans)
+    public function notification(Request $request)
+    {
+        $transaction = $request->input('transaction_status');
+        $orderId = $request->input('order_id');
+        $fraud = $request->input('fraud_status');
+
+        // Retrieve the order from the database
+        $order = Order::where('id', $orderId)->first();
+
+        // handling order status according to transaction status
+        if ($order) {
+            if ($transaction == 'capture') {
+                if ($fraud == 'challenge') {
+                    // handle captured challenge
+                }
+                else if ($fraud == 'accept') {
+                    // handle captured accept
+                }
+                // $order->status = 'processing';
+                $order->update(['status' => 'processing']);
+            } else if ($transaction == 'settlement') {
+                $order->update(['status' => 'processing']);
+            } else if ($transaction == 'cancel' || $transaction == 'deny' || $transaction == 'expire') {
+                $order->update(['status' => 'cancelled']);
+            } else if ($transaction == 'pending') {
+                $order->update(['status' => 'pending']);
+            }
+            $order->save();
+        }
+        
+        return response()->json(['message' => 'Payment notification received']);
+
     }
 
     /**

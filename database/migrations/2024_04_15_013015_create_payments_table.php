@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('method_id');
             $table->unsignedBigInteger('order_id');
             $table->decimal('amount');
+            $table->string('snap_token')->nullable();
             $table->timestamps();
         });
 
