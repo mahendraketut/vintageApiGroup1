@@ -37,7 +37,6 @@ class PaymentController extends Controller
         $totalPrice = $order->total;
 
         $payment = Payment::create([
-            'method_id' => $request->method_id,
             'order_id' => $request->order_id,
             'amount' => $totalPrice
         ]);
@@ -92,6 +91,7 @@ class PaymentController extends Controller
     public function notification(Request $request)
     {
         $transaction = $request->input('transaction_status');
+        $paymentMethod = $request->input('payment_type');
         $orderId = $request->input('order_id');
         $fraud = $request->input('fraud_status');
 
@@ -117,6 +117,9 @@ class PaymentController extends Controller
                 $order->update(['status' => 'pending']);
             }
             $order->save();
+            $payment = $order->payment;
+            $payment->payment_method = $paymentMethod;
+            $payment->save();
         }
         
         return response()->json(['message' => 'Payment notification received']);

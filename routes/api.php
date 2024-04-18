@@ -7,6 +7,7 @@ use App\Http\Controllers\Payments\PaymentController;
 use App\Http\Controllers\Payments\PaymentMethodController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ShippingController;
 use App\Models\Wishlist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -64,5 +65,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/order/cart', [OrderController::class, 'cartOrder']);
         Route::get('/order/{order}', [OrderController::class, 'show']);
         Route::put('/order/{order}/cancel', [OrderController::class, 'cancel']);
+        Route::put('/order/{shipping}/shipped', [ShippingController::class, 'createTrackingNumber']);
+        Route::put('/order/{order}/complete', [OrderController::class, 'completeOrder']);
     });
 });

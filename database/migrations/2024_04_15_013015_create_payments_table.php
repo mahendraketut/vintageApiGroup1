@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('method_id');
+            $table->string('payment_method')->default('');
             $table->unsignedBigInteger('order_id');
             $table->decimal('amount');
             $table->string('snap_token')->nullable();
