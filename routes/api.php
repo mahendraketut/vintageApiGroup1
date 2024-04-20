@@ -32,6 +32,10 @@ Route::prefix('v1')->group(function () {
 
     Route::post('register', 'App\Http\Controllers\Auth\RegisterController@register');
     Route::post('login', 'App\Http\Controllers\Auth\LoginController@login');
+    Route::get('ratings', 'App\Http\Controllers\RatingController@index');
+    Route::get('ratings/{productId}', 'App\Http\Controllers\RatingController@getRating');
+    Route::get('ratings/average/{productId}', 'App\Http\Controllers\RatingController@averageRating');
+    Route::get('ratings/{rating}', 'App\Http\Controllers\RatingController@show');
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::put('change-password', 'App\Http\Controllers\Auth\ChangePasswordController@changePassword');
@@ -57,5 +61,6 @@ Route::prefix('v1')->group(function () {
         Route::post('/order/cart', [OrderController::class, 'cartOrder']);
         Route::get('/order/{order}', [OrderController::class, 'show']);
         Route::put('/order/{order}/cancel', [OrderController::class, 'cancel']);
+        Route::post('ratings', 'App\Http\Controllers\RatingController@store');
     });
 });

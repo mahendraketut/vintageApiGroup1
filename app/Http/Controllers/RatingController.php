@@ -16,13 +16,19 @@ class RatingController extends Controller
      *
      * @param \Illuminate\Http\Request  $request
      */
-    public function index($productId = null)
+    public function index()
     {
-        if ($productId) {
-            $ratings = Rating::where('product_id', $productId)->get();
-        } else {
-            $ratings = Rating::all();
-        }
+        $ratings = Rating::all();
+
+        return $this->successResponse($ratings, 'Ratings retrieved successfully');
+    }
+
+    /**
+     * Get rating for specific product.
+     */
+    public function getRating($productId)
+    {
+        $ratings = Rating::where('product_id', $productId)->get();
 
         return $this->successResponse($ratings, 'Ratings retrieved successfully');
     }
