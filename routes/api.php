@@ -35,6 +35,10 @@ Route::prefix('v1')->group(function () {
 
     Route::post('register', 'App\Http\Controllers\Auth\RegisterController@register');
     Route::post('login', 'App\Http\Controllers\Auth\LoginController@login');
+    Route::get('ratings', 'App\Http\Controllers\RatingController@index');
+    Route::get('ratings/{productId}', 'App\Http\Controllers\RatingController@getRating');
+    Route::get('ratings/average/{productId}', 'App\Http\Controllers\RatingController@averageRating');
+    Route::get('ratings/{rating}', 'App\Http\Controllers\RatingController@show');
 
     Route::resource('/payment-methods', PaymentMethodController::class);
 
@@ -46,7 +50,7 @@ Route::prefix('v1')->group(function () {
         Route::put('/products/restore/{product}', [ProductController::class, 'restore']);
         Route::resource('/products', ProductController::class);
         Route::resource('/carts', CartController::class);
-        
+
         Route::resource('/payments', PaymentController::class)->except('notification');
 
 
@@ -67,5 +71,6 @@ Route::prefix('v1')->group(function () {
         Route::put('/order/{order}/cancel', [OrderController::class, 'cancel']);
         Route::put('/order/{shipping}/shipped', [ShippingController::class, 'createTrackingNumber']);
         Route::put('/order/{order}/complete', [OrderController::class, 'completeOrder']);
+        Route::post('ratings', 'App\Http\Controllers\RatingController@store');
     });
 });
