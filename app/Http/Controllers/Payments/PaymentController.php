@@ -52,15 +52,15 @@ class PaymentController extends Controller
 
         $params = array(
             'transaction_details' => array(
-                'order_id' => $request->order_id,
+                'order_id' => $order->order_number,
                 'gross_amount' => $totalPrice,
             ),
             'customer_details' => array(
-                'name' => Auth::user()->username,
+                'name' => Auth::user()->full_name,
                 'email' => Auth::user()->email
             )
         );
-        
+
         $snapResponse = \Midtrans\Snap::createTransaction($params);
 
         $payment->snap_token = $snapResponse->token;
@@ -103,8 +103,7 @@ class PaymentController extends Controller
             if ($transaction == 'capture') {
                 if ($fraud == 'challenge') {
                     // handle captured challenge
-                }
-                else if ($fraud == 'accept') {
+                } else if ($fraud == 'accept') {
                     // handle captured accept
                 }
                 // $order->status = 'processing';
@@ -121,9 +120,8 @@ class PaymentController extends Controller
             $payment->payment_method = $paymentMethod;
             $payment->save();
         }
-        
-        return response()->json(['message' => 'Payment notification received']);
 
+        return response()->json(['message' => 'Payment notification received']);
     }
 
     /**
