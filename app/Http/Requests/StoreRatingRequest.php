@@ -26,7 +26,6 @@ class StoreRatingRequest extends FormRequest
         return [
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string',
-            'user_id' => 'required|exists:users,id',
             'product_id' => 'required|exists:products,id',
         ];
     }
@@ -42,8 +41,6 @@ class StoreRatingRequest extends FormRequest
             'rating.min' => 'Rating must be at least 1',
             'rating.max' => 'Rating must not be greater than 5',
             'comment.string' => 'Comment must be a string',
-            'user_id.required' => 'User ID is required',
-            'user_id.exists' => 'User ID does not exist',
             'product_id.required' => 'Product ID is required',
             'product_id.exists' => 'Product ID does not exist',
         ];

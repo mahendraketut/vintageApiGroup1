@@ -36,7 +36,7 @@ Route::prefix('v1')->group(function () {
     Route::post('register', 'App\Http\Controllers\Auth\RegisterController@register');
     Route::post('login', 'App\Http\Controllers\Auth\LoginController@login');
     Route::get('ratings', 'App\Http\Controllers\RatingController@index');
-    Route::get('ratings/{productId}', 'App\Http\Controllers\RatingController@getRating');
+    Route::get('ratings/product/{productId}', 'App\Http\Controllers\RatingController@getRating');
     Route::get('ratings/average/{productId}', 'App\Http\Controllers\RatingController@averageRating');
     Route::get('ratings/{rating}', 'App\Http\Controllers\RatingController@show');
 

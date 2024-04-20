@@ -6,6 +6,7 @@ use App\Models\Rating;
 use App\Http\Requests\StoreRatingRequest;
 use App\Http\Requests\UpdateRatingRequest;
 use App\Traits\ApiResponseTrait;
+use Illuminate\Support\Facades\Auth;
 
 class RatingController extends Controller
 {
@@ -55,7 +56,14 @@ class RatingController extends Controller
      */
     public function store(StoreRatingRequest $request)
     {
-        $rating = Rating::create($request->all());
+        $rating = Rating::create(
+            [
+                'rating' => $request->rating,
+                'comment' => $request->comment,
+                'user_id' => Auth::user()->id,
+                'product_id' => $request->product_id,
+            ]
+        );
 
         return $this->successResponse($rating, 'Rating created successfully', 201);
     }
