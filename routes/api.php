@@ -42,6 +42,7 @@ Route::prefix('v1')->group(function () {
 
     Route::resource('/payment-methods', PaymentMethodController::class);
 
+
     Route::middleware('auth:sanctum')->group(function () {
         Route::put('change-password', 'App\Http\Controllers\Auth\ChangePasswordController@changePassword');
         Route::post('logout', 'App\Http\Controllers\Auth\LogoutController@logout');
@@ -69,8 +70,10 @@ Route::prefix('v1')->group(function () {
         Route::post('/order/cart', [OrderController::class, 'cartOrder']);
         Route::get('/order/{order}', [OrderController::class, 'show']);
         Route::put('/order/{order}/cancel', [OrderController::class, 'cancel']);
+
         Route::put('/order/{shipping}/shipped', [ShippingController::class, 'createTrackingNumber']);
         Route::put('/order/{order}/complete', [OrderController::class, 'completeOrder']);
+
         Route::post('ratings', 'App\Http\Controllers\RatingController@store');
     });
 });
