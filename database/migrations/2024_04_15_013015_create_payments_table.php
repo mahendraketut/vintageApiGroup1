@@ -18,12 +18,11 @@ return new class extends Migration
             $table->decimal('amount');
             $table->string('snap_token')->nullable();
             $table->timestamps();
-        });
 
-        Schema::create('payment_methods', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->timestamps();
+            $table->foreign('order_id')
+                ->references('id')
+                ->on('orders')
+                ->onDelete('cascade');
         });
     }
 
@@ -33,6 +32,5 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('payments');
-        Schema::dropIfExists('payment_methods');
     }
 };
