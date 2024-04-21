@@ -36,8 +36,6 @@ Route::prefix('v1')->group(function () {
     Route::post('register', 'App\Http\Controllers\Auth\RegisterController@register');
     Route::post('login', 'App\Http\Controllers\Auth\LoginController@login');
 
-    Route::resource('/payment-methods', PaymentMethodController::class);
-
     Route::middleware('auth:sanctum')->group(function () {
         Route::put('change-password', 'App\Http\Controllers\Auth\ChangePasswordController@changePassword');
         Route::post('logout', 'App\Http\Controllers\Auth\LogoutController@logout');
