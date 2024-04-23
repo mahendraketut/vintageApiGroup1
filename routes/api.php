@@ -3,8 +3,11 @@
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\Payments\PaymentController;
+use App\Http\Controllers\Payments\PaymentMethodController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ShippingController;
 use App\Models\Wishlist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -32,6 +35,13 @@ Route::prefix('v1')->group(function () {
 
     Route::post('register', 'App\Http\Controllers\Auth\RegisterController@register');
     Route::post('login', 'App\Http\Controllers\Auth\LoginController@login');
+    Route::get('ratings', 'App\Http\Controllers\RatingController@index');
+    Route::get('ratings/product/{productId}', 'App\Http\Controllers\RatingController@getRating');
+    Route::get('ratings/average/{productId}', 'App\Http\Controllers\RatingController@averageRating');
+    Route::get('ratings/{rating}', 'App\Http\Controllers\RatingController@show');
+
+    Route::resource('/payment-methods', PaymentMethodController::class);
+
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::put('change-password', 'App\Http\Controllers\Auth\ChangePasswordController@changePassword');
@@ -41,6 +51,9 @@ Route::prefix('v1')->group(function () {
         Route::put('/products/restore/{product}', [ProductController::class, 'restore']);
         Route::resource('/products', ProductController::class);
         Route::resource('/carts', CartController::class);
+
+        Route::resource('/payments', PaymentController::class)->except('notification');
+
 
         Route::prefix('profile')->group(function () {
             Route::get('profile-detail/{profile}', 'App\Http\Controllers\Profiles\ProfileController@show');
@@ -57,5 +70,10 @@ Route::prefix('v1')->group(function () {
         Route::post('/order/cart', [OrderController::class, 'cartOrder']);
         Route::get('/order/{order}', [OrderController::class, 'show']);
         Route::put('/order/{order}/cancel', [OrderController::class, 'cancel']);
+
+        Route::put('/order/{shipping}/shipped', [ShippingController::class, 'createTrackingNumber']);
+        Route::put('/order/{order}/complete', [OrderController::class, 'completeOrder']);
+
+        Route::post('ratings', 'App\Http\Controllers\RatingController@store');
     });
 });

@@ -115,7 +115,7 @@ class OrderController extends Controller
         // Attach shipping details to the order
         $order->shipping()->create([
             'shipping_address_id' => $addressId,
-            'tracking_number' => 'TRK' . time() . rand(001, 999),
+            // 'tracking_number' => 'TRK' . time() . rand(001, 999),
             'service' => $shippingService,
             'cost' => $shippingCost
         ]);
@@ -220,7 +220,7 @@ class OrderController extends Controller
 
         $order->shipping()->create([
             'shipping_address_id' => $request->address_id,
-            'tracking_number' => 'TRK' . time() . rand(001, 999),
+            // 'tracking_number' => 'TRK' . time() . rand(001, 999),
             'service' => $shippingData['service'],
             'cost' => $shippingData['cost'],
         ]);
@@ -253,9 +253,28 @@ class OrderController extends Controller
     public function cancel(Order $order)
     {
         // Update the order status to cancelled and return a success response
-        $order = Order::findOrFail($order->id);
-        $order->update(['status' => 'cancelled']);
+        $order->status = 'cancelled';
+        $order->save();
+
+        $orderDetails = $order->orderDetails;
+
+        // undo product quantity decrement
+        foreach ($orderDetails as $orderDetail) {
+            $product = Product::findOrFail($orderDetail->product_id);
+            $product->increment('quantity', $orderDetail->quantity);
+        }
 
         return $this->successResponse($order, 'Order cancelled successfully.');
+    }
+
+    /**
+     * Update status when order has delivered
+     */
+    public function completeOrder(Order $order)
+    {
+        $order->status = 'completed';
+        $order->save();
+
+        return $this->successResponse($order, "Order Completed");
     }
 }
