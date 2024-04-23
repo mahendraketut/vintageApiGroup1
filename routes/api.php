@@ -47,6 +47,8 @@ Route::prefix('v1')->group(function () {
         
         Route::resource('/payments', PaymentController::class)->except('notification');
 
+        Route::put('payment-notification', [PaymentController::class, 'notification']);
+
 
         Route::prefix('profile')->group(function () {
             Route::get('profile-detail/{profile}', 'App\Http\Controllers\Profiles\ProfileController@show');

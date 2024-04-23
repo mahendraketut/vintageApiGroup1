@@ -20,7 +20,7 @@ class LoginController extends Controller
     {
         // Check if the user credentials are valid
         if (!auth()->attempt($request->only('email', 'password'))) {
-            return $this->unauthorizedResponse('Invalid credentials');
+            return $this->unAuthorisedResponse('Invalid credentials');
         }
 
         // Get the authenticated user
